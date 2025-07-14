@@ -1,0 +1,123 @@
+\documentclass{article}
+\usepackage{graphicx, float}
+\graphicspath{{Images/}}
+
+% Geometry of a document
+%sets paper size, margins
+\usepackage[letterpaper, top=1in, bottom=1in, left=0.7in, right=0.7in, heightrounded]{geometry}
+
+%line height
+\renewcommand{\baselinestretch}{1.15} %line spacing
+
+%parskip - space between paragraph  and parindent - size of a tab beggining of paragraph
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.8em}
+
+\title{Green ball detection}
+\author{Petar Stamenkovic | BioSens Institute}
+\date{July 2025}
+
+\begin{document}
+\maketitle
+
+\newpage
+
+\section{Introduction}
+This introductory project features a detection and tracking of a green ball via live stream of a camera. It uses HSV transformation and contour detection using OpenCv and DepthAI python libraries. When it comes to Hardware, OAK D Lite camera by Luxnois is used for video streaming. And yes, you will need a green ball to detect it.
+\\\\Code is written entirely using a Python programming language and version 3 (\textbf{important}) of the DepthAI library.
+
+\section{What will you need?}
+\begin{itemize}
+    \item \textbf{OAK D Lite Camera} 
+
+    \item \textbf{USB C cable}
+    
+    \item \textbf{Tripod} - Optional
+    
+    \item \textbf{Ubuntu OS} - Preferable 
+
+    \item \textbf{Visual Studio Code} - Preferable to have a good text editor
+
+    \item \textbf{Python libraries} - DepthAI Version 3, Matplotlib, OpenCV, Numpy
+
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.68\linewidth]{Images/OAK-D-Lite.jpg}
+    \caption{OAK D Lite setup}
+    \label{fig:enter-label}
+\end{figure}
+
+\newpage
+\section{Code analysis}
+In this section, a Python code file is covered from start to end, with additional explanations. Code is written in Visual Studio Code and it is ran from its terminal.
+
+\subsection{Importing libraries}As always, we begin by importing all the necessary libraries. We use mentioned OpenCV to draw out the frame and detected objects region of interest (ROI) on the host computer. Collections library is used to create buffer for spatial coordinates to reduce the jittering introduced by a stereo camera sensitivity. Finally, we use DepthAI for creating a pipeline for the OAK Camera and connect required nodes. \subsection{Pipeline}
+OAK Camera setup uses nodes that represent certain functionalities and pipelines to connect them in a specified order. In this code we use the following nodes.
+
+\begin{itemize}
+    \item \textbf{Camera node} - We create one RGB camera \textit{CAM-A} for an actual image preview, and two mono cameras that will link to Stereo Node in order to calculate depth (\textit{CAM-B and CAM-C}). All camera resolutions are 640/480 with 30 fps on the RGB camera.  
+
+    \item \textbf{Stereo Depth node} - Calculates Depth from the input of two mono cameras and provides information to the \textit{inputDepth} port of the Spatial Location Calculator node.
+    
+    \item \textbf{Spatial Calculator Node} - Calculates and provides spatial coordinate values and lets us print them on the final frame.
+\end{itemize}
+
+After this, we use method \textit{createOutputQueues} and method \textit{createInputQueues} to prepare necessary values for processing in the main loop. Pipeline is started.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.68\linewidth]{Images/GreenBallPipeline.jpg}
+    \caption{Pipeline sketch}
+    \label{fig:enter-label}
+\end{figure}
+
+\newpage
+
+\subsection{Main while loop for processing}
+This loop processes the information we received from our hardware and draws it out on the host computer. The idea is to fetch a frame from the RGB camera in a variable called \textit{frame} and to transform it into a HSV format with a mask for green color. Here is the first part of the code where we can adjust some parameters in terms of the intensity of a color. Of course, this can now be changed to \textit{any} color for detection. HSV short for Hue, Saturation and Value is used to separate \textbf{color} and \textbf{brightness}, since same color can appear different under a different lightning, in terms of its RGB values. It practically separates color and lightning within reason of course and it is a standard when it comes to a color detection methods.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.68\linewidth]{Images/hsv.png}
+    \caption{HSV format conversion}
+    \label{fig:enter-label}
+\end{figure}
+
+After detecting a color, we also need to detect the circular shape. For this we use OpenCV method \textit{findContours} with the defined mask (\textit{green}). This finds the outlines for green objects on the image. We find the biggest contour that fits the filters. We fetch parameters for the circle via \textit{minEnclosingCircle} and use another parameter (\textit{circularity}) to adjust the "perfection" of the circle. 
+
+Now that a circle is found we calculate region of interest for it. With variables x1, x2, y1 and y2 we draw ROI out on the frame we see, and for the Spatial Location Calculator we need to normalize the values before sending them. ROI is configured, depth thresholds are set (\textit{how close and how far can camera detect an object}) and configuration is sent to a Spatial Location Calculator node. 
+
+Spatial data is now fetched from the output of the Spatial Location Calculator node and printed out on the frame, for us to see them. Also, horizontal and vertical lines are drawn on the frame just to check the quality of spatial data. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.68\linewidth]{Images/Green Ball Tracker_screenshot_14.07.2025.png}
+    \caption{Detected green ball}
+    \label{fig:enter-label}
+\end{figure}
+
+Note that y axis value gets bigger as we go down, this is slightingly different from the actual coordinate system used in simple math. To exit the frame and camera steam press 'q'.
+
+\newpage
+
+\section{\textbf{Possible improvements}}
+
+\begin{itemize}
+    \item \textbf{Multiple object detection} - Currently, as mentioned, we detect one objects spatial coordinates. This can be improved to detecting and tracking multiple green balls on the frame.
+
+    \item \textbf{Spatial coordinates jitter} - Due to a nature of the Stereo and depth calculations, spatial coordinates can change quite fast, especially in the edge of cameras vision. I am not sure how to fix that, ball detection works fine close to a center of a cameras eyes. 
+
+    \item \textbf{Z axis} - The most problematic axis is Z, the depth metric. It works in exclusive positions right, but as soon as object gets to close or far, values are inaccurate and start changing chaotically. To be discussed with mentors. 
+
+    \item \textbf{Light and odd angles} - Light conditions affect the quality of detection by a lot, even though HSV conversion is used. More research on this to be done...
+\end{itemize}
+
+This task is still in progress, but all helpful information are welcome. Send me an email petastamenkovic35@gmail.com
+
+Cheers!
+
+
+
+\end{document}
