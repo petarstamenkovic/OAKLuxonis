@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 
 model = YOLO("green_ball_dataset/runs/detect/train2/weights/best.pt")
-results = model("live_sample1.png", show=True)
+results = model("green_ball_test_sample2.png", show=True)
 
 # Display with OpenCV
 annotated_frame = results[0].plot()

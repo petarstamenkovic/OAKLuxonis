@@ -129,12 +129,10 @@ while pipeline.isRunning:
     #print(type(nnData))
     #print(dir(nnData)) # Lists all attributes and methods of nnData
 
-    out1 = nnData.getTensor("output1_yolov6r2")
-    out2 = nnData.getTensor("output2_yolov6r2")
-    out3 = nnData.getTensor("output3_yolov6r2")
+    #out1 = nnData.getTensor("output1_yolov6r2")
+    #out2 = nnData.getTensor("output2_yolov6r2")
+    #out3 = nnData.getTensor("output3_yolov6r2")
 
-#    print("Output 1: ", out1)
- #   print(dir(nnData.getTensor("output1_yolov6r2")))
     #print("Output 1: ", out1.shape)
     #print("Output 2: ", out2.shape)
     #print("Output 3: ", out3.shape) 
@@ -150,9 +148,10 @@ while pipeline.isRunning:
     pixel_boxes += convert_boxes_to_pixels([b for b in boxes if b['grid_x'] < 40 and b['grid_y'] < 40], 40)
     pixel_boxes += convert_boxes_to_pixels([b for b in boxes if b['grid_x'] < 20 and b['grid_y'] < 20], 20)
 
+    # Non-
     pixel_boxes = nms(pixel_boxes)
 
-  # KEEP ONLY THE SINGLE BEST BOX (HIGHEST CONFIDENCE)
+    # Keep the best box if multiple boxes are detected
     if pixel_boxes:
         pixel_boxes = [max(pixel_boxes, key=lambda b: b['conf'])]
 
