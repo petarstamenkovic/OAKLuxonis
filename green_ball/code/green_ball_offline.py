@@ -39,6 +39,7 @@ camOutQueue = cameraOut.createOutputQueue()
 # Start pipeline
 pipeline.start()
 
+# Main loop for processing
 with open('mono1.h264', 'wb') as fileMono1H264, open('color.h264', 'wb') as fileColorH264, open('mono2.h264', 'wb') as fileMono2H264:
     print("Press Ctrl+C to stop encoding...")
     try:
@@ -61,8 +62,7 @@ with open('mono1.h264', 'wb') as fileMono1H264, open('color.h264', 'wb') as file
 
 cv2.destroyAllWindows()
 
-print("To view the encoded data, convert the stream file (.h264/.h265) into a video file (.mp4), using commands below:")
-cmd = "ffmpeg -framerate 30 -i {} -c copy {}"
-print(cmd.format("mono1.h264", "mono1.mp4"))
-print(cmd.format("mono2.h264", "mono2.mp4"))
-print(cmd.format("color.h264", "color.mp4"))
+# Commands to run for file conversion to mp4
+# ffmpeg -framerate 30 -i mono1.h264 -c copy mono1.mp4
+# ffmpeg -framerate 30 -i mono2.h264 -c copy mono2.mp4
+# ffmpeg -framerate 30 -i color.h264 -c copy color.mp4
